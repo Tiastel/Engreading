@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReadFlow | The Academic English Journal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Newsreader', 'Merriweather', 'Georgia', 'serif'],
+            sans: ['Inter', 'Pretendard', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-full flex flex-col font-sans transition-colors duration-150">
+
+  <!-- ============================================================== -->
+  <!-- TOP READING PROGRESS BAR (상단 독서 진행률 표시선) -->
+  <!-- ============================================================== -->
+  <div id="reading-progress-bar" style="width: 0%"></div>
+
+  <!-- ============================================================== -->
+  <!-- TOP UTILITY & INSTITUTIONAL HEADER (학술 마스트헤드) -->
+  <!-- ============================================================== -->
+  <header class="border-b border-zinc-200 dark:border-zinc-800 bg-[#faf9f6] dark:bg-[#111215] sticky top-0 z-40">
+    
+    <!-- 1층: 글로벌 상태 및 학술 저널 메타 바 -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400 border-b border-zinc-200/70 dark:border-zinc-800/60 font-mono tracking-tight">
+      <div class="flex items-center space-x-3">
+        <span class="font-bold text-zinc-800 dark:text-zinc-200">READFLOW ACADEMIC ARCHIVES</span>
+        <span class="text-zinc-300 dark:text-zinc-700">|</span>
+        <span class="hidden md:inline">PEER-REVIEWED SOURCES: HARVARD · NATURE · BBC · BRITANNICA · NIST</span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <!-- 테마 3단 스위치: 아이보리 / 세피아 / 다크 -->
+        <div class="flex items-center bg-zinc-200/60 dark:bg-zinc-800 p-0.5 rounded text-[10px]">
+          <button id="theme-btn-light" class="px-2 py-0.5 rounded transition font-bold" title="아이보리 (기본)">아이보리</button>
+          <button id="theme-btn-sepia" class="px-2 py-0.5 rounded transition" title="세피아 (양장본)">세피아</button>
+          <button id="theme-btn-dark" class="px-2 py-0.5 rounded transition" title="다크 (야간)">다크</button>
+        </div>
+        <span class="text-zinc-300 dark:text-zinc-700">|</span>
+        <!-- 단축키 안내 버튼 -->
+        <button id="btn-open-shortcuts" class="hover:text-zinc-900 dark:hover:text-white transition flex items-center gap-1 font-bold" title="단축키 안내">
+          <span>⌨ 단축키</span>
+          <kbd class="px-1 py-0.2 bg-zinc-200 dark:bg-zinc-800 rounded text-[9px]">?</kbd>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2층: 프레스티지 브랜드 & 인터랙션 툴바 -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- 로고 & 학술 저널 표제 -->
+      <div class="flex items-baseline space-x-3 cursor-pointer" onclick="location.reload()">
+        <h1 class="text-2xl sm:text-3xl font-serif font-black tracking-tight text-zinc-900 dark:text-zinc-100 uppercase">
+          ReadFlow
+        </h1>
+        <div class="flex flex-col">
+          <span class="text-[11px] font-mono tracking-widest text-zinc-500 uppercase font-semibold">Institute of English Comprehension</span>
+          <span class="text-[10px] text-zinc-400 font-serif italic hidden sm:inline">Rigorous Syntactic Parsing & 20,000+ Verified Lexicon Integration</span>
+        </div>
+      </div>
+
+      <!-- 상단 핵심 액션 (서재, 단어 시험, 오답노트, 지문 기고, AI) -->
+      <div class="flex items-center flex-wrap gap-2 text-xs font-medium">
+        
+        <!-- 90개 서재 라이브러리 열기 -->
+        <button id="btn-open-library-modal" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-sm border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700/80 transition text-zinc-800 dark:text-zinc-200 shadow-xs">
+          <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          <span class="font-bold">서재</span>
+          <span id="header-passage-count-badge" class="font-mono text-[10px] px-1 bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded">300편</span>
+        </button>
+
+        <!-- wordtest1 연동: 단어 시험 보기 -->
+        <button id="btn-open-wordtest-modal" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-sm border border-emerald-300 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/30 hover:bg-emerald-100/60 dark:hover:bg-emerald-900/50 transition text-emerald-900 dark:text-emerald-200 shadow-xs">
+          <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span class="font-bold">단어 시험</span>
+          <span id="header-wordtest-count-badge" class="text-[10px] font-mono px-1 bg-emerald-200/80 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200 rounded font-bold">20,243 DB</span>
+        </button>
+
+        <!-- 편입 논리 특훈 (Logic Lab) 뷰 전환 -->
+        <button id="btn-toggle-logic-view" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-sm border border-purple-300 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/30 hover:bg-purple-100/60 dark:hover:bg-purple-900/50 transition text-purple-900 dark:text-purple-200 shadow-xs" title="편입 논리완성 실전 집중 훈련">
+          <svg class="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span class="font-bold">편입 논리 특훈</span>
+          <span class="text-[10px] font-mono px-1 bg-purple-200/80 dark:bg-purple-900 text-purple-900 dark:text-purple-200 rounded font-bold">1,000제 LAB</span>
+        </button>
+
+        <!-- 독해 오답노트 -->
+        <button id="btn-open-wrongnotes-modal" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-sm border border-rose-300 dark:border-rose-900 bg-rose-50/50 dark:bg-rose-950/30 hover:bg-rose-100/60 dark:hover:bg-rose-900/50 transition text-rose-900 dark:text-rose-200 shadow-xs">
+          <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span class="font-bold">오답노트</span>
+          <span id="wrong-count-badge" class="text-[10px] font-mono px-1 bg-rose-200 dark:bg-rose-900 text-rose-900 dark:text-rose-200 rounded font-bold">0</span>
+        </button>
+
+        <!-- 새 지문 등록 -->
+        <button id="btn-open-add-modal" class="px-2.5 py-1.5 rounded-sm border border-zinc-300 dark:border-zinc-700 hover:border-zinc-500 transition text-zinc-700 dark:text-zinc-300">
+          + 지문 기고
+        </button>
+
+        <!-- AI 설정 -->
+        <button id="btn-open-ai-modal" class="p-1.5 text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition" title="Gemini AI 설정">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </button>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- MAIN WORKSPACE: READER & SCHOLARLY PANEL -->
+  <!-- ============================================================== -->
+  <main id="main-reading-view" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+    <!-- 좌측/중앙: 리더 영역 (7 컬럼) -->
+    <article class="lg:col-span-7 flex flex-col space-y-5">
+      
+      <!-- 아티클 헤더 & 바이라인 -->
+      <div class="border-b border-zinc-200 dark:border-zinc-800 pb-5">
+        
+        <!-- 메타 태그 & 탐색기 (빠른 지문 선택 드롭다운 + 지문 목록 버튼 + 이전/다음) -->
+        <div class="flex flex-wrap items-center justify-between gap-3 text-xs mb-3 font-mono">
+          <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+            <span id="passage-level-badge" class="px-2 py-0.5 border border-zinc-300 dark:border-zinc-700 uppercase font-bold text-zinc-800 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800/80 rounded-xs">초급 (A2-B1)</span>
+            <span id="passage-category-badge" class="text-zinc-500 uppercase font-semibold">HEALTH</span>
+            <span class="text-zinc-300 dark:text-zinc-700">·</span>
+            <span id="passage-source" class="text-zinc-600 dark:text-zinc-400 font-serif italic">Harvard Health</span>
+          </div>
+
+          <!-- 지문 즉시 이동 툴바 -->
+          <div class="flex items-center space-x-1.5 flex-wrap gap-y-1">
+            <!-- 300편 전체 지문 즉시 선택 드롭다운 -->
+            <select id="quick-passage-select" class="text-[11px] font-sans bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 px-2 py-1 rounded max-w-[200px] sm:max-w-[260px] truncate focus:outline-none" title="300편 지문 즉시 이동">
+              <!-- JS 동적 생성 -->
+            </select>
+
+            <!-- 전체 지문 목록 브라우저 토글 -->
+            <button id="btn-toggle-quick-catalog" class="px-2 py-1 border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded text-[11px] font-mono flex items-center gap-1 font-semibold" title="300편 전체 지문 목차 열기">
+              <span>📚 300편 목록</span>
+            </button>
+
+            <!-- 이전/다음 아티클 넘기기 -->
+            <div class="flex items-center space-x-1 border-l border-zinc-200 dark:border-zinc-800 pl-1.5">
+              <button id="btn-prev-passage" class="px-2 py-1 border border-zinc-200 dark:border-zinc-800 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition" title="이전 지문 [P]">← PREV</button>
+              <span id="passage-index-indicator" class="text-zinc-400 font-mono text-[11px] px-1">1 / 300</span>
+              <button id="btn-next-passage" class="px-2 py-1 border border-zinc-200 dark:border-zinc-800 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition" title="다음 지문 [N]">NEXT →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 인라인 300편 전체 지문 빠른 브라우저 패널 (토글형) -->
+        <div id="quick-catalog-panel" class="hidden mb-4 p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-zinc-200 dark:border-zinc-800 text-xs font-mono">
+            <span class="font-bold text-zinc-900 dark:text-zinc-100">300편 학술 지문 전체 목차 (원하는 지문을 클릭하세요)</span>
+            <div class="flex items-center space-x-2">
+              <input type="text" id="quick-catalog-search" placeholder="제목/주제 검색..." class="text-[11px] px-2.5 py-1 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded w-44 focus:outline-none">
+              <button id="btn-close-quick-catalog" class="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 font-mono text-sm">✕</button>
+            </div>
+          </div>
+          <div class="flex space-x-1 text-[11px] font-mono mb-2 overflow-x-auto">
+            <button class="qc-filter-btn px-2.5 py-0.5 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 rounded-xs font-bold" data-level="all">전체 (300)</button>
+            <button class="qc-filter-btn px-2.5 py-0.5 border border-zinc-300 dark:border-zinc-700 rounded-xs" data-level="Beginner">초급 (100)</button>
+            <button class="qc-filter-btn px-2.5 py-0.5 border border-zinc-300 dark:border-zinc-700 rounded-xs" data-level="Intermediate">중급 (100)</button>
+            <button class="qc-filter-btn px-2.5 py-0.5 border border-zinc-300 dark:border-zinc-700 rounded-xs" data-level="Advanced">고급 (100)</button>
+          </div>
+          <div id="quick-catalog-list" class="max-h-64 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs font-serif pr-1">
+            <!-- JS 렌더링 -->
+          </div>
+        </div>
+
+        <!-- 영문 제목 & 한글 제목 -->
+        <h2 id="passage-title" class="text-2xl sm:text-3xl lg:text-4xl font-serif font-black tracking-tight text-zinc-900 dark:text-zinc-100 leading-tight">
+          Daily Habits of Long-Lived People
+        </h2>
+        <h3 id="passage-korean-title" class="text-sm sm:text-base font-serif text-zinc-500 dark:text-zinc-400 mt-1">
+          장수하는 사람들의 일상 습관
+        </h3>
+
+        <!-- 요약문 (Abstract) -->
+        <p id="passage-summary" class="mt-3.5 text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 font-serif italic leading-relaxed pl-3.5 border-l-2 border-zinc-400 dark:border-zinc-600">
+          100세 이상 건강하게 살아가는 사람들의 공통적인 일상 습관과 자연식 식단을 살펴봅니다.
+        </p>
+
+        <!-- 읽기 메타정보 -->
+        <div class="mt-3 flex items-center space-x-4 text-[11px] text-zinc-400 font-mono">
+          <span id="passage-word-count">142 WORDS</span>
+          <span>EST. READ: <span id="passage-time">2 MIN</span></span>
+          <span id="passage-completion-status" class="text-emerald-600 dark:text-emerald-400 hidden">✓ 완독 완료</span>
+        </div>
+
+      </div>
+
+      <!-- 리더 툴바 (TTS & 독해 모드 스위치) -->
+      <div class="bg-zinc-100/80 dark:bg-zinc-900/60 p-2.5 border border-zinc-200 dark:border-zinc-800 rounded-sm flex flex-wrap items-center justify-between gap-3 text-xs font-mono shadow-2xs">
+        
+        <!-- 오디오 컨트롤 -->
+        <div class="flex items-center space-x-2">
+          <button id="btn-tts-play" class="flex items-center space-x-1.5 px-3 py-1.5 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-bold rounded-sm hover:opacity-90 transition shadow-xs">
+            <svg id="tts-play-icon" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <span id="tts-play-text">PLAY AUDIO</span>
+            <div id="tts-audio-wave" class="audio-wave hidden">
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </button>
+          <button id="btn-tts-stop" class="p-1.5 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition" title="오디오 정지">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+          </button>
+          <select id="select-tts-speed" class="bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 px-1.5 py-1 rounded text-[11px] focus:outline-none">
+            <option value="0.8">0.8x</option>
+            <option value="1.0" selected>1.0x</option>
+            <option value="1.2">1.2x</option>
+          </select>
+          <select id="select-tts-voice" class="bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 px-1.5 py-1 rounded text-[11px] max-w-[125px] truncate focus:outline-none" title="음성 화자 선택">
+            <option value="">Default Voice</option>
+          </select>
+        </div>
+
+        <!-- 독해 모드 토글 (끊어읽기, 한줄번역, 빈칸훈련) -->
+        <div class="flex items-center space-x-2.5 text-[11px]">
+          <label class="flex items-center space-x-1 cursor-pointer select-none">
+            <input type="checkbox" id="toggle-chunk-mode" class="rounded text-zinc-900">
+            <span>끊어읽기 ( / )</span>
+          </label>
+          <label class="flex items-center space-x-1 cursor-pointer select-none">
+            <input type="checkbox" id="toggle-direct-trans" class="rounded text-zinc-900">
+            <span>직독직해</span>
+          </label>
+          <label class="flex items-center space-x-1 cursor-pointer select-none">
+            <input type="checkbox" id="toggle-cloze-mode" class="rounded text-zinc-900">
+            <span>빈칸훈련 [···]</span>
+          </label>
+          <div class="flex items-center space-x-1 border-l border-zinc-300 dark:border-zinc-700 pl-2">
+            <button id="btn-font-decrease" class="hover:text-zinc-900 dark:hover:text-white font-bold px-1" title="글자 축소">A-</button>
+            <span id="font-size-indicator" class="text-[10px] text-zinc-400">18px</span>
+            <button id="btn-font-increase" class="hover:text-zinc-900 dark:hover:text-white font-bold px-1" title="글자 확대">A+</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 본문 텍스트 렌더링 컨테이너 -->
+      <div class="bg-white dark:bg-[#15161a] border border-zinc-200 dark:border-zinc-800 p-6 sm:p-9 rounded-sm shadow-xs min-h-[420px]">
+        <div id="passage-text-container" class="passage-editorial leading-[1.85] text-zinc-900 dark:text-zinc-100 text-lg transition-all">
+          <!-- JS 렌더링 -->
+        </div>
+
+        <!-- 팁 가이드 바 -->
+        <div class="mt-8 pt-4 border-t border-zinc-100 dark:border-zinc-800/80 text-[11px] font-mono text-zinc-400 flex flex-wrap items-center justify-between gap-2">
+          <span>* 문장 클릭 시 낭독 청취 · 단어 클릭 시 20,243 DB 자동 조회</span>
+          <span class="text-zinc-300 dark:text-zinc-700">|</span>
+          <span>Space: 낭독 재생 · J/K: 문장 이동 · 1~4: 퀴즈 풀기</span>
+        </div>
+      </div>
+
+    </article>
+
+    <!-- 우측: 학술 분석 & 퀴즈 패널 (5 컬럼) -->
+    <aside class="lg:col-span-5 flex flex-col space-y-4">
+      
+      <!-- 탭 컨테이너 -->
+      <div class="bg-white dark:bg-[#15161a] border border-zinc-200 dark:border-zinc-800 rounded-sm flex flex-col overflow-hidden shadow-xs">
+        
+        <!-- 탭 헤더 (5개 탭: 어휘, 퀴즈, 해설, 카드, 사전검색) -->
+        <div class="flex border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 text-[11px]">
+          <button class="tab-link flex-1 active" data-tab="vocab">핵심 어휘</button>
+          <button class="tab-link flex-1" data-tab="quiz">실전 퀴즈</button>
+          <button class="tab-link flex-1" data-tab="notes">구문 해설</button>
+          <button class="tab-link flex-1" data-tab="flashcard">암기 카드</button>
+          <button class="tab-link flex-1" data-tab="dict">사전 검색</button>
+        </div>
+
+        <!-- 탭 바디 -->
+        <div class="p-5 flex-1 overflow-y-auto max-h-[calc(100vh-230px)] min-h-[480px]">
+          
+          <!-- 탭 1: 핵심 어휘 -->
+          <div id="tab-vocab-content" class="space-y-4">
+            <!-- 동적 렌더링 -->
+          </div>
+
+          <!-- 탭 2: 퀴즈 -->
+          <div id="tab-quiz-content" class="hidden space-y-4">
+            <!-- 동적 렌더링 -->
+          </div>
+
+          <!-- 탭 3: 구문 해설 -->
+          <div id="tab-notes-content" class="hidden space-y-4">
+            <!-- 동적 렌더링 -->
+          </div>
+
+          <!-- 탭 4: 플래시카드 -->
+          <div id="tab-flashcard-content" class="hidden space-y-4">
+            <!-- 동적 렌더링 -->
+          </div>
+
+          <!-- 탭 5: 20,243 DB 사전 직접 검색 -->
+          <div id="tab-dict-content" class="hidden space-y-4">
+            <div class="p-3 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-sm">
+              <label class="block text-[11px] font-mono text-zinc-500 mb-1 uppercase">VERIFIED MASTER LEXICON SEARCH (<span id="search-db-count">20,243</span> WORDS)</label>
+              <div class="flex gap-2">
+                <input type="text" id="dict-tab-search-input" placeholder="영단어 입력 (예: resilience, mitigate)..." class="flex-1 text-xs px-3 py-1.5 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-xs focus:outline-none font-mono">
+                <button id="dict-tab-search-btn" class="px-3 py-1.5 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-mono text-xs rounded-xs font-bold">검색</button>
+              </div>
+            </div>
+            <div id="dict-tab-result-container" class="space-y-3 pt-1">
+              <p class="text-xs text-zinc-400 font-serif italic text-center py-6">궁금한 단어를 입력하면 20,243 검증 데이터베이스에서 즉시 뜻과 발음을 확인합니다.</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- FULL WORKSPACE: THE TRANSFER LOGIC LABORATORY (편입 논리 실전 훈련 뷰) -->
+  <!-- ============================================================== -->
+  <section id="main-logic-view" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="bg-white dark:bg-[#15161a] border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 sm:p-9 shadow-xs">
+      
+      <!-- 상단 헤더 & 복귀 버튼 -->
+      <div class="flex flex-wrap items-center justify-between pb-5 border-b border-zinc-200 dark:border-zinc-800 gap-3">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="px-2 py-0.5 bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 font-mono text-xs font-bold rounded-xs">EXAM SIMULATION</span>
+            <h2 class="text-xl sm:text-2xl font-serif font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">THE TRANSFER LOGIC LABORATORY</h2>
+          </div>
+          <p class="text-xs text-zinc-500 font-serif mt-1">서강대·성균관대·한양대·중앙대 등 상위권 편입 실전 논리완성 · 단서 및 논리 유형은 풀이 후 해설에서 공개됩니다.</p>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <button id="btn-refresh-logiclab" class="px-3 py-1.5 border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 text-xs font-mono rounded-xs">새 문제 뽑기 ↻</button>
+          <button id="btn-return-journal" class="flex items-center space-x-1.5 px-3 py-1.5 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 text-xs font-mono font-bold rounded-xs hover:opacity-90 transition">
+            <span>← 독해 지문으로 돌아가기</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 진행률 바 & 난이도 5등급 필터 툴바 -->
+      <div class="py-3 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 dark:border-zinc-800/80 text-xs font-mono">
+        <div class="flex items-center space-x-1 flex-wrap gap-y-1">
+          <span class="text-zinc-400 mr-1 font-bold">난이도:</span>
+          <button class="logic-lvl-btn px-2.5 py-1 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 rounded-xs font-bold" data-lvl="all">전체 (1,000)</button>
+          <button class="logic-lvl-btn px-2 py-1 border border-zinc-300 dark:border-zinc-700 rounded-xs hover:bg-zinc-100 dark:hover:bg-zinc-800" data-lvl="1">Lv.1 기초 (200)</button>
+          <button class="logic-lvl-btn px-2 py-1 border border-zinc-300 dark:border-zinc-700 rounded-xs hover:bg-zinc-100 dark:hover:bg-zinc-800" data-lvl="2">Lv.2 중급 (200)</button>
+          <button class="logic-lvl-btn px-2 py-1 border border-zinc-300 dark:border-zinc-700 rounded-xs hover:bg-zinc-100 dark:hover:bg-zinc-800" data-lvl="3">Lv.3 상급·2빈칸 (200)</button>
+          <button class="logic-lvl-btn px-2 py-1 border border-zinc-300 dark:border-zinc-700 rounded-xs hover:bg-zinc-100 dark:hover:bg-zinc-800" data-lvl="4">Lv.4 장문논리 (200)</button>
+          <button class="logic-lvl-btn px-2 py-1 border border-zinc-300 dark:border-zinc-700 rounded-xs hover:bg-zinc-100 dark:hover:bg-zinc-800" data-lvl="5">Lv.5 극상킬러 (200)</button>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <input type="text" id="logiclab-search" placeholder="키워드/주제/어휘 검색..." class="text-xs px-2.5 py-1 border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xs w-44 focus:outline-none">
+          <span class="text-zinc-400">|</span>
+          <div class="text-zinc-500">
+            진행: <span id="logiclab-answered-count" class="font-bold text-zinc-900 dark:text-zinc-100">0</span> / <span id="logiclab-total-count">1000</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 세트 선택 및 페이지네이션 툴바 -->
+      <div id="logiclab-pagination-bar" class="py-2.5 px-3 bg-zinc-50 dark:bg-zinc-900/60 border-b border-zinc-100 dark:border-zinc-800/80 flex flex-wrap items-center justify-between text-xs font-mono text-zinc-500 gap-2">
+        <div class="flex items-center space-x-2">
+          <span>세트 선택:</span>
+          <select id="logiclab-set-select" class="text-xs bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 px-2 py-0.5 rounded focus:outline-none">
+            <!-- JS 동적 생성 -->
+          </select>
+          <span id="logiclab-page-indicator" class="text-[11px] text-zinc-400">1~20번 문항 표시 중</span>
+        </div>
+        <div class="flex items-center space-x-1">
+          <button id="btn-logic-prev-set" class="px-2 py-0.5 border border-zinc-200 dark:border-zinc-800 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800">← 이전 세트</button>
+          <button id="btn-logic-next-set" class="px-2 py-0.5 border border-zinc-200 dark:border-zinc-800 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800">다음 세트 →</button>
+          <button id="btn-logic-view-all" class="px-2 py-0.5 border border-purple-300 dark:border-purple-800 text-purple-700 dark:text-purple-300 rounded ml-2 font-bold">전체 펼쳐보기</button>
+        </div>
+      </div>
+
+      <!-- 문제 리스트 (독해 사이트 본문 스타일과 일관된 고급 카드 형태) -->
+      <div id="logiclab-container" class="py-5 space-y-6">
+        <!-- JS 렌더링: 순수 영어 선지, 단서 없음, 풀이 후 상세 어휘표 및 논리축 공개 -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 1: 90개 서재 라이브러리 브라우저 (Library Modal) -->
+  <!-- ============================================================== -->
+  <div id="library-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div id="library-modal-overlay" class="absolute inset-0 bg-black/50 backdrop-blur-xs"></div>
+    <div class="relative bg-white dark:bg-zinc-900 w-full max-w-4xl rounded-sm border border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 flex flex-col max-h-[90vh]">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800">
+        <div>
+          <h3 class="text-xl font-serif font-black text-zinc-900 dark:text-zinc-100">ARCHIVE OF 300 ESSAYS</h3>
+          <p class="text-xs font-mono text-zinc-500">공신력 있는 학술 저널 및 언론에서 엄선된 300개 심층 독해 지문</p>
+        </div>
+        <button id="btn-close-library-modal" class="text-zinc-400 hover:text-zinc-700 text-lg font-mono">✕</button>
+      </div>
+
+      <!-- 난이도 필터 & 검색 바 -->
+      <div class="py-3 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 dark:border-zinc-800/80">
+        <div class="flex items-center space-x-1 text-xs font-mono">
+          <button class="lib-filter-btn px-3 py-1 border border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900 rounded-xs" data-level="All">전체 (300)</button>
+          <button class="lib-filter-btn px-3 py-1 border border-zinc-300 dark:border-zinc-700 rounded-xs" data-level="Beginner">초급 (100)</button>
+          <button class="lib-filter-btn px-3 py-1 border border-zinc-300 dark:border-zinc-700 rounded-xs" data-level="Intermediate">중급 (100)</button>
+          <button class="lib-filter-btn px-3 py-1 border border-zinc-300 dark:border-zinc-700 rounded-xs" data-level="Advanced">고급 (100)</button>
+        </div>
+        <input type="text" id="input-search-library" placeholder="지문 제목, 주제, 키워드 검색..." class="text-xs px-3 py-1.5 border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xs w-64 focus:outline-none">
+      </div>
+
+      <!-- 지문 그리드 목록 -->
+      <div id="library-passage-grid" class="flex-1 overflow-y-auto py-4 grid grid-cols-1 md:grid-cols-2 gap-3 pr-1">
+        <!-- JS 렌더링 -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 2: 단어 시험 (wordtest1 연동 모달) -->
+  <!-- ============================================================== -->
+  <div id="wordtest-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div id="wordtest-modal-overlay" class="absolute inset-0 bg-black/50 backdrop-blur-xs"></div>
+    <div class="relative bg-white dark:bg-zinc-900 w-full max-w-2xl rounded-sm border border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 flex flex-col max-h-[85vh]">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-800">
+        <div class="flex items-center space-x-2">
+          <span class="text-xs font-mono uppercase px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded-xs">wordtest1 연동</span>
+          <h3 class="text-lg font-serif font-black text-zinc-900 dark:text-zinc-100">데일리 단어 어휘력 테스트</h3>
+        </div>
+        <button id="btn-close-wordtest-modal" class="text-zinc-400 hover:text-zinc-700 font-mono">✕</button>
+      </div>
+
+      <div class="py-3 text-xs text-zinc-600 dark:text-zinc-400 font-serif border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+        <span><span id="test-pool-db-count">20,243</span>개 영단어 데이터베이스에서 무작위 10단어를 출제합니다.</span>
+        <button id="btn-new-wordtest" class="px-2.5 py-1 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-mono text-[11px] rounded-xs hover:opacity-90">새 문제 뽑기 ↻</button>
+      </div>
+
+      <!-- 테스트 문제 리스트 -->
+      <div id="wordtest-container" class="flex-1 overflow-y-auto py-3 space-y-3 pr-1">
+        <!-- JS 렌더링 -->
+      </div>
+
+      <!-- 채점 결과 및 버튼 -->
+      <div class="pt-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+        <div id="wordtest-score-display" class="font-mono text-xs font-bold text-zinc-900 dark:text-zinc-100">
+          점수: - / 10
+        </div>
+        <button id="btn-submit-wordtest" class="px-4 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xs hover:bg-emerald-700 transition">
+          답안 제출 및 채점
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 3: 독해 오답노트 (Wrong Answers Notebook) -->
+  <!-- ============================================================== -->
+  <div id="wrongnotes-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div id="wrongnotes-modal-overlay" class="absolute inset-0 bg-black/50 backdrop-blur-xs"></div>
+    <div class="relative bg-white dark:bg-zinc-900 w-full max-w-2xl rounded-sm border border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 flex flex-col max-h-[85vh]">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-800">
+        <div>
+          <h3 class="text-lg font-serif font-black text-zinc-900 dark:text-zinc-100">독해 및 단어 오답노트</h3>
+          <p class="text-xs font-mono text-zinc-500">틀렸던 문제와 어휘를 모아 즉시 재시험 보고 복습합니다.</p>
+        </div>
+        <button id="btn-close-wrongnotes-modal" class="text-zinc-400 hover:text-zinc-700 font-mono">✕</button>
+      </div>
+
+      <!-- 필터 및 제어 버튼 -->
+      <div class="py-2.5 flex flex-wrap items-center justify-between border-b border-zinc-100 dark:border-zinc-800 text-xs font-mono gap-2">
+        <div class="flex space-x-1 overflow-x-auto">
+          <button id="filter-wn-all" class="px-2 py-0.5 border border-zinc-800 bg-zinc-800 text-white dark:border-white dark:bg-white dark:text-zinc-900 rounded-xs">전체</button>
+          <button id="filter-wn-quiz" class="px-2 py-0.5 border border-zinc-300 dark:border-zinc-700 rounded-xs">독해 일치</button>
+          <button id="filter-wn-cloze" class="px-2 py-0.5 border border-zinc-300 dark:border-zinc-700 rounded-xs">빈칸 추론</button>
+          <button id="filter-wn-order" class="px-2 py-0.5 border border-zinc-300 dark:border-zinc-700 rounded-xs">문단 순서</button>
+          <button id="filter-wn-logic" class="px-2 py-0.5 border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 font-bold rounded-xs">편입 논리</button>
+          <button id="filter-wn-words" class="px-2 py-0.5 border border-zinc-300 dark:border-zinc-700 rounded-xs">틀린 단어</button>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button id="btn-export-wrongnotes" class="text-zinc-600 dark:text-zinc-400 hover:underline">텍스트 복사</button>
+          <span class="text-zinc-300 dark:text-zinc-700">|</span>
+          <button id="btn-backup-json" class="text-zinc-600 dark:text-zinc-400 hover:underline" title="오답노트 및 저장 단어 JSON 파일로 백업">JSON 백업</button>
+          <span class="text-zinc-300 dark:text-zinc-700">|</span>
+          <label class="text-zinc-600 dark:text-zinc-400 hover:underline cursor-pointer" title="이전 백업 파일 복원">
+            <span>복원</span>
+            <input type="file" id="input-restore-json" accept=".json" class="hidden">
+          </label>
+          <span class="text-zinc-300 dark:text-zinc-700">|</span>
+          <button id="btn-clear-wrongnotes" class="text-rose-600 hover:underline">전체 비우기</button>
+        </div>
+      </div>
+
+      <div id="wrongnotes-container" class="flex-1 overflow-y-auto space-y-4 py-3 pr-1">
+        <!-- JS 렌더링 -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 4: 새 지문 등록 (지문 기고) -->
+  <!-- ============================================================== -->
+  <div id="add-passage-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div id="modal-overlay" class="absolute inset-0 bg-black/50 backdrop-blur-xs"></div>
+    <div class="relative bg-white dark:bg-zinc-900 w-full max-w-lg rounded-sm border border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 overflow-hidden">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-800">
+        <h3 class="font-serif font-black text-lg text-zinc-900 dark:text-zinc-100">새 독해 지문 등록</h3>
+        <button id="btn-close-modal" class="text-zinc-400 hover:text-zinc-700 font-mono">✕</button>
+      </div>
+      
+      <form id="form-add-passage" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-mono text-zinc-600 dark:text-zinc-400 mb-1">ENGLISH TITLE</label>
+          <input type="text" id="input-passage-title" required placeholder="예: The Architecture of Quantum Systems" class="w-full text-xs px-3 py-2 border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xs focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-mono text-zinc-600 dark:text-zinc-400 mb-1">KOREAN TITLE</label>
+            <input type="text" id="input-passage-korean-title" placeholder="예: 양자 컴퓨팅의 아키텍처" class="w-full text-xs px-3 py-2 border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xs focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-zinc-600 dark:text-zinc-400 mb-1">LEVEL</label>
+            <select id="input-passage-level" class="w-full text-xs px-3 py-2 border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xs focus:outline-none">
+              <option value="Beginner">Beginner (초급)</option>
+              <option value="Intermediate" selected>Intermediate (중급)</option>
+              <option value="Advanced">Advanced (고급)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono text-zinc-600 dark:text-zinc-400 mb-1">PASSAGE BODY TEXT</label>
+          <textarea id="input-passage-content" required rows="6" placeholder="연습하고 싶은 영어 원문을 붙여넣으세요. 마침표(.)를 기준으로 문장이 자동 분석됩니다." class="w-full text-xs font-serif px-3 py-2 border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xs focus:outline-none leading-relaxed"></textarea>
+        </div>
+
+        <div class="p-3 bg-zinc-100 dark:bg-zinc-800/60 rounded-xs text-xs font-serif">
+          <label class="flex items-center space-x-2 font-bold cursor-pointer">
+            <input type="checkbox" id="check-ai-full-analysis" checked class="rounded text-zinc-900">
+            <span>✨ 자동 구문 분석 및 3문제 실전 퀴즈 출제</span>
+          </label>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-2">
+          <button type="button" onclick="document.getElementById('add-passage-modal').classList.add('hidden')" class="px-3 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900">취소</button>
+          <button type="submit" id="btn-submit-passage" class="px-4 py-1.5 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 text-xs font-bold rounded-xs hover:opacity-90">지문 분석 및 등록</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 5: AI 설정 모달 -->
+  <!-- ============================================================== -->
+  <div id="ai-settings-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div id="ai-settings-modal-overlay" class="absolute inset-0 bg-black/50 backdrop-blur-xs"></div>
+    <div class="relative bg-white dark:bg-zinc-900 w-full max-w-md rounded-sm border border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-800">
+        <h3 class="font-serif font-black text-base text-zinc-900 dark:text-zinc-100">AI ENGINE CONFIGURATION</h3>
+        <button id="btn-close-ai-modal" class="text-zinc-400 hover:text-zinc-700 font-mono">✕</button>
+      </div>
+
+      <div class="mt-4 space-y-4 text-xs font-serif">
+        <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          Google AI Studio의 <strong>Gemini API Key</strong>를 입력하시면, 신규 지문 등록 시 원어민급 직독직해 번역과 실전 객관식 퀴즈 3문제가 완전 자동 출제됩니다. (API 키 없이도 15,000 사전 및 기본 분석 작동)
+        </p>
+
+        <div>
+          <label class="block font-mono text-zinc-500 mb-1">GEMINI API KEY</label>
+          <input type="password" id="input-gemini-key" placeholder="AIzaSy..." class="w-full text-xs font-mono px-3 py-2 border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xs focus:outline-none">
+        </div>
+
+        <div class="flex items-center justify-between text-[11px] font-mono">
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-600 hover:underline">Get Free Key at Google AI Studio →</a>
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+          <button type="button" id="btn-clear-ai-key" class="px-3 py-1.5 text-zinc-500 hover:text-rose-600">삭제</button>
+          <button type="button" id="btn-save-ai-key" class="px-4 py-1.5 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-bold rounded-xs">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 6: 키보드 단축키 가이드 (Keyboard Shortcuts Modal) -->
+  <!-- ============================================================== -->
+  <div id="shortcuts-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div id="shortcuts-modal-overlay" class="absolute inset-0 bg-black/50 backdrop-blur-xs"></div>
+    <div class="relative bg-white dark:bg-zinc-900 w-full max-w-md rounded-sm border border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-800">
+        <h3 class="font-serif font-black text-base text-zinc-900 dark:text-zinc-100">KEYBOARD SHORTCUTS</h3>
+        <button id="btn-close-shortcuts-modal" class="text-zinc-400 hover:text-zinc-700 font-mono">✕</button>
+      </div>
+      <div class="mt-4 space-y-2.5 text-xs font-mono">
+        <div class="flex items-center justify-between py-1 border-b border-zinc-100 dark:border-zinc-800">
+          <span class="text-zinc-600 dark:text-zinc-400">지문 음성 낭독 / 일시정지</span>
+          <kbd class="px-2 py-0.5 bg-zinc-200 dark:bg-zinc-800 font-bold rounded">Space</kbd>
+        </div>
+        <div class="flex items-center justify-between py-1 border-b border-zinc-100 dark:border-zinc-800">
+          <span class="text-zinc-600 dark:text-zinc-400">다음 / 이전 문장 듣기</span>
+          <div class="space-x-1">
+            <kbd class="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded">J</kbd>
+            <kbd class="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded">K</kbd>
+          </div>
+        </div>
+        <div class="flex items-center justify-between py-1 border-b border-zinc-100 dark:border-zinc-800">
+          <span class="text-zinc-600 dark:text-zinc-400">다음 / 이전 지문 넘기기</span>
+          <div class="space-x-1">
+            <kbd class="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded">N</kbd>
+            <kbd class="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded">P</kbd>
+          </div>
+        </div>
+        <div class="flex items-center justify-between py-1 border-b border-zinc-100 dark:border-zinc-800">
+          <span class="text-zinc-600 dark:text-zinc-400">퀴즈 보기 선택 (1번~4번)</span>
+          <div class="space-x-1">
+            <kbd class="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded">1</kbd>
+            <kbd class="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded">2</kbd>
+            <kbd class="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded">3</kbd>
+            <kbd class="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded">4</kbd>
+          </div>
+        </div>
+        <div class="flex items-center justify-between py-1 border-b border-zinc-100 dark:border-zinc-800">
+          <span class="text-zinc-600 dark:text-zinc-400">우측 탭 전환 (어휘/퀴즈/해설/카드/사전)</span>
+          <div class="space-x-1">
+            <kbd class="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded">Alt+1~5</kbd>
+          </div>
+        </div>
+        <div class="flex items-center justify-between py-1">
+          <span class="text-zinc-600 dark:text-zinc-400">팝업 및 모달 닫기</span>
+          <kbd class="px-2 py-0.5 bg-zinc-200 dark:bg-zinc-800 font-bold rounded">Esc</kbd>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- DICTIONARY POPUP (20,243 DB + AI 문맥) -->
+  <!-- ============================================================== -->
+  <div id="word-popup">
+    <div class="flex items-start justify-between border-b border-zinc-100 dark:border-zinc-800 pb-2 mb-2">
+      <div>
+        <span id="popup-word" class="font-serif font-bold text-base text-zinc-900 dark:text-zinc-100">Word</span>
+        <span id="popup-pos" class="text-[11px] font-mono text-zinc-400 ml-1">pos</span>
+      </div>
+      <button id="popup-pronounce-btn" class="p-1 text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200" title="발음 청취">
+        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    
+    <div class="mb-2">
+      <span class="text-[10px] font-mono uppercase text-zinc-400">KOREAN MEANING (<span id="popup-db-label">20,243 DB</span>)</span>
+      <div id="popup-korean-meaning" class="text-sm font-serif font-bold text-zinc-900 dark:text-zinc-100 leading-snug mt-0.5">
+        조회 중...
+      </div>
+    </div>
+
+    <div id="popup-ai-context-box" class="mb-2 border-t border-zinc-100 dark:border-zinc-800 pt-1.5 hidden">
+      <span class="text-[10px] font-mono text-purple-600 dark:text-purple-400">AI CONTEXTUAL SENSE</span>
+      <div id="popup-ai-context" class="text-xs font-serif text-purple-900 dark:text-purple-200 bg-purple-50 dark:bg-purple-950/30 p-1.5 rounded mt-0.5 leading-relaxed"></div>
+    </div>
+
+    <div class="mb-2 border-t border-zinc-100 dark:border-zinc-800 pt-1.5">
+      <span class="text-[10px] font-mono uppercase text-zinc-400">ENGLISH DEFINITION</span>
+      <div id="popup-eng-meaning" class="text-xs text-zinc-600 dark:text-zinc-400 font-serif leading-relaxed mt-0.5 max-h-16 overflow-y-auto">
+        Loading...
+      </div>
+    </div>
+
+    <div class="mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-[11px]">
+      <button id="popup-save-btn" class="text-zinc-500 hover:text-zinc-900 dark:hover:text-white font-bold transition">★ 단어장 저장</button>
+      <span class="font-mono text-zinc-400 text-[10px]">WORDTEST1 연동</span>
+    </div>
+  </div>
+
+  <!-- 푸터 -->
+  <footer class="mt-auto border-t border-zinc-200 dark:border-zinc-800 py-6 px-4 text-center text-xs font-mono text-zinc-400 bg-[#faf9f6] dark:bg-[#111215]">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <span>READFLOW JOURNAL &copy; 2026 · PEER-REVIEWED CORPUS (300 ESSAYS)</span>
+      <div class="flex items-center space-x-3">
+        <span>WORDTEST1 (<span id="footer-db-count">20,243 WORDS</span>)</span>
+        <span>·</span>
+        <span>ACADEMIC COMPREHENSION</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 스크립트 연결: wordtest1 20,243 DB -> 300개 지문 데이터 -> 300편입논리은행 -> 파생 퀴즈 & 편입 논리 엔진 -> 메인 앱 -->
+  <script src="js/wordtest_db.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/logic_bank.js"></script>
+  <script src="js/quiz_engine.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

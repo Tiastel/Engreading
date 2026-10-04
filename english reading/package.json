@@ -1,0 +1,16 @@
+{
+  "name": "english-reading-practice",
+  "version": "1.0.0",
+  "description": "ReadFlow - 스마트 영어 독해 연습 사이트",
+  "scripts": {
+    "start": "npx serve -l 3000 .",
+    "dev": "python -m http.server 3000"
+  },
+  "keywords": [
+    "english",
+    "reading",
+    "education"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,318 @@
+/* ==========================================================================
+   ReadFlow Academic Reader & Editorial Journal Design System
+   Corporate & Prestige Editorial Theme (Inspired by Stripe Press & The Atlantic)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+:root {
+  --font-serif: 'Newsreader', 'Merriweather', Georgia, Cambria, serif;
+  --font-sans: 'Inter', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Editorial Warm Palette (Ivory/Paper) */
+  --bg-page: #faf9f6;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f4f2ec;
+  --text-main: #18181b;
+  --text-muted: #52525b;
+  --text-light: #71717a;
+  --border-subtle: #e4e2db;
+  --border-bold: #27272a;
+  
+  /* Academic Accents */
+  --accent-burgundy: #881337;
+  --accent-forest: #14532d;
+  --accent-navy: #1e3a8a;
+  --accent-terracotta: #c2410c;
+  --highlight-yellow: #fef08a;
+}
+
+/* 다크 모드 (Obsidian Dark) */
+.dark {
+  --bg-page: #0d0e11;
+  --bg-surface: #15161a;
+  --bg-subtle: #1c1e24;
+  --text-main: #f4f4f5;
+  --text-muted: #a1a1aa;
+  --text-light: #71717a;
+  --border-subtle: #262830;
+  --border-bold: #52525b;
+  --highlight-yellow: #854d0e;
+}
+
+/* 세피아 모드 (Classic Book Sepia) */
+.sepia {
+  --bg-page: #fbf5e8;
+  --bg-surface: #f6eee0;
+  --bg-subtle: #ede1cd;
+  --text-main: #382c1e;
+  --text-muted: #6b5c49;
+  --text-light: #94826b;
+  --border-subtle: #e2d4be;
+  --border-bold: #52402e;
+  --highlight-yellow: #fde047;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* 상단 독서 진행 바 */
+#reading-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #18181b, #71717a);
+  z-index: 999;
+  transition: width 0.15s ease-out;
+}
+.dark #reading-progress-bar {
+  background: linear-gradient(90deg, #f4f4f5, #a1a1aa);
+}
+.sepia #reading-progress-bar {
+  background: linear-gradient(90deg, #92400e, #d97706);
+}
+
+/* 본문 전용 에디토리얼 세리프 서체 */
+.passage-editorial {
+  font-family: var(--font-serif);
+  letter-spacing: -0.012em;
+}
+
+/* 문장 호버 및 TTS 낭독 하이라이트 */
+.sentence-item {
+  position: relative;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  border-radius: 3px;
+  padding: 1px 3px;
+  cursor: pointer;
+}
+
+.sentence-item:hover {
+  background-color: rgba(24, 24, 27, 0.05);
+}
+.dark .sentence-item:hover {
+  background-color: rgba(244, 244, 245, 0.08);
+}
+.sepia .sentence-item:hover {
+  background-color: rgba(56, 44, 30, 0.08);
+}
+
+.sentence-item.speaking-active {
+  background-color: var(--highlight-yellow) !important;
+  color: #000000 !important;
+  box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.4);
+  border-radius: 3px;
+}
+
+/* 단어 클릭 호버 효과 */
+.clickable-word {
+  display: inline-block;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.clickable-word:hover {
+  color: #2563eb;
+  background-color: rgba(37, 99, 235, 0.08);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.dark .clickable-word:hover {
+  color: #93c5fd;
+  background-color: rgba(147, 197, 253, 0.15);
+}
+.sepia .clickable-word:hover {
+  color: #b45309;
+  background-color: rgba(180, 83, 9, 0.12);
+}
+
+/* 끊어읽기 구문 슬래시 */
+.chunk-slash {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #dc2626;
+  opacity: 0.65;
+  margin: 0 4px;
+  user-select: none;
+}
+.dark .chunk-slash {
+  color: #f87171;
+}
+.sepia .chunk-slash {
+  color: #c2410c;
+}
+
+/* 빈칸 채우기 (Cloze) 훈련 모드 */
+.cloze-blank {
+  background-color: #e4e4e7;
+  color: transparent !important;
+  border-bottom: 2px solid #18181b;
+  border-radius: 2px;
+  padding: 0 5px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+.dark .cloze-blank {
+  background-color: #27272a;
+  border-bottom-color: #a1a1aa;
+}
+.sepia .cloze-blank {
+  background-color: #ede1cd;
+  border-bottom-color: #52402e;
+}
+.cloze-blank::after {
+  content: '···';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #71717a;
+  font-family: var(--font-mono);
+  font-size: 0.75em;
+  font-weight: 700;
+}
+.cloze-blank:hover {
+  background-color: #d4d4d8;
+}
+.cloze-blank.cloze-revealed {
+  background-color: #e0f2fe !important;
+  color: #0369a1 !important;
+  border-bottom: 2px solid #0284c7;
+}
+.dark .cloze-blank.cloze-revealed {
+  background-color: #0c4a6e !important;
+  color: #bae6fd !important;
+}
+.cloze-blank.cloze-revealed::after {
+  display: none !important;
+}
+
+/* 인라인 직독직해 번역 */
+.sentence-translation-inline {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  background-color: var(--bg-subtle);
+  border-left: 3px solid #71717a;
+  padding: 5px 12px;
+  margin: 5px 0 12px 0;
+  border-radius: 0 4px 4px 0;
+}
+.dark .sentence-translation-inline {
+  border-left-color: #52525b;
+}
+
+/* 낭독 중 오디오 파형 애니메이션 */
+.audio-wave {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 12px;
+}
+.audio-wave span {
+  width: 2.5px;
+  background-color: currentColor;
+  border-radius: 1px;
+  animation: wave 0.8s ease-in-out infinite alternate;
+}
+.audio-wave span:nth-child(1) { height: 4px; animation-delay: 0.1s; }
+.audio-wave span:nth-child(2) { height: 11px; animation-delay: 0.3s; }
+.audio-wave span:nth-child(3) { height: 7px; animation-delay: 0.2s; }
+.audio-wave span:nth-child(4) { height: 12px; animation-delay: 0.4s; }
+
+@keyframes wave {
+  0% { height: 3px; }
+  100% { height: 12px; }
+}
+
+/* 사전 미니 팝업 */
+#word-popup {
+  position: absolute;
+  z-index: 1000;
+  display: none;
+  min-width: 270px;
+  max-width: 360px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+  padding: 14px 16px;
+}
+
+/* 퀴즈 옵션 스타일 */
+.quiz-option {
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  transition: all 0.15s ease;
+}
+.quiz-option:hover:not(:disabled) {
+  border-color: var(--border-bold);
+  background-color: var(--bg-subtle);
+}
+.quiz-option.correct {
+  border-color: #15803d !important;
+  background-color: #f0fdf4 !important;
+  color: #14532d !important;
+}
+.dark .quiz-option.correct {
+  background-color: #052e16 !important;
+  color: #bbf7d0 !important;
+}
+.quiz-option.incorrect {
+  border-color: #b91c1c !important;
+  background-color: #fef2f2 !important;
+  color: #7f1d1d !important;
+}
+.dark .quiz-option.incorrect {
+  background-color: #450a0a !important;
+  color: #fecaca !important;
+}
+
+/* 탭 전환 */
+.tab-link {
+  position: relative;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-light);
+  padding: 9px 12px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+}
+.tab-link:hover {
+  color: var(--text-main);
+}
+.tab-link.active {
+  color: var(--text-main);
+  border-bottom-color: var(--border-bold);
+}
+
+/* 스크롤바 미세 스타일링 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+}
