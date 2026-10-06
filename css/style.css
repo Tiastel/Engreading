@@ -242,13 +242,42 @@ body {
   position: absolute;
   z-index: 1000;
   display: none;
-  min-width: 270px;
-  max-width: 360px;
+  min-width: 280px;
+  max-width: 380px;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
   padding: 14px 16px;
+}
+
+/* 문맥상 실제 사용된 뜻 (파란색 하이라이트) */
+.popup-contextual-meaning {
+  color: #1d4ed8 !important; /* Tailwind Blue 700 */
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 700;
+  display: inline-block;
+  font-size: 0.9375rem;
+}
+.dark .popup-contextual-meaning {
+  color: #93c5fd !important; /* Tailwind Blue 300 */
+  background-color: rgba(30, 58, 138, 0.4);
+  border-color: rgba(59, 130, 246, 0.45);
+}
+
+.popup-other-meanings {
+  color: #71717a;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  display: block;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+.dark .popup-other-meanings {
+  color: #a1a1aa;
 }
 
 /* 퀴즈 옵션 스타일 */

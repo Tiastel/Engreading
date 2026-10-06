@@ -24,6 +24,232 @@ function initWordtestMap() {
 }
 initWordtestMap();
 
+// ==========================================
+// MORPHOLOGICAL LEMMATIZER & IDIOM MATCHER
+// ==========================================
+const IRREGULAR_LEMMAS = {
+  'phenomena': 'phenomenon', 'criteria': 'criterion', 'hypotheses': 'hypothesis',
+  'analyses': 'analysis', 'indices': 'index', 'children': 'child', 'men': 'man',
+  'women': 'woman', 'mice': 'mouse', 'halves': 'half', 'lives': 'life',
+  'leaves': 'leaf', 'knives': 'knife', 'went': 'go', 'gone': 'go', 'ran': 'run',
+  'saw': 'see', 'seen': 'see', 'took': 'take', 'taken': 'take', 'began': 'begin',
+  'held': 'hold', 'led': 'lead', 'built': 'build', 'taught': 'teach', 'thought': 'think',
+  'bought': 'buy', 'brought': 'bring', 'found': 'find', 'understood': 'understand',
+  'grew': 'grow', 'grown': 'grow', 'drew': 'draw', 'drawn': 'draw', 'chose': 'choose',
+  'chosen': 'choose', 'spoke': 'speak', 'spoken': 'speak', 'broke': 'break',
+  'broken': 'break', 'fell': 'fall', 'fallen': 'fall', 'arose': 'arise', 'arisen': 'arise',
+  'wrote': 'write', 'written': 'write', 'drove': 'drive', 'driven': 'drive',
+  'rode': 'ride', 'ridden': 'ride', 'rose': 'rise', 'risen': 'rise'
+};
+
+const MASTER_COMMON_IDIOMS = [
+  { word: "pave the way for", meaning: "~의 길을 열어주다, 토대를 마련하다", pos: "phr." },
+  { word: "account for", meaning: "설명하다, (비율을) 차지하다", pos: "phr." },
+  { word: "ward off", meaning: "막다, 물리치다", pos: "phr." },
+  { word: "shed light on", meaning: "~을 규명하다, 밝혀내다", pos: "phr." },
+  { word: "give rise to", meaning: "~을 낳다, 초래하다", pos: "phr." },
+  { word: "in response to", meaning: "~에 반응하여, 부응하여", pos: "phr." },
+  { word: "come to grips with", meaning: "~을 완전히 이해하다, 대처하다", pos: "phr." },
+  { word: "hinge upon", meaning: "~에 달려 있다, 좌우되다", pos: "phr." },
+  { word: "run counter to", meaning: "~에 반대되다, 어긋나다", pos: "phr." },
+  { word: "at the expense of", meaning: "~을 희생하여, 대가로", pos: "phr." },
+  { word: "take into account", meaning: "~을 참작하다, 고려하다", pos: "phr." },
+  { word: "take account of", meaning: "~을 고려하다", pos: "phr." },
+  { word: "bring about", meaning: "초래하다, 야기하다", pos: "phr." },
+  { word: "bear out", meaning: "입증하다, 지지하다", pos: "phr." },
+  { word: "align with", meaning: "~와 부합하다, 일치하다", pos: "phr." },
+  { word: "give way to", meaning: "~에 자리를 내주다, 바뀌다", pos: "phr." },
+  { word: "guard against", meaning: "~을 경계하다, 방지하다", pos: "phr." },
+  { word: "scale up", meaning: "확장하다, 규모를 키우다", pos: "phr." },
+  { word: "weed out", meaning: "걸러내다, 제거하다", pos: "phr." },
+  { word: "stand the test of time", meaning: "세월의 시험을 견뎌내다, 영속하다", pos: "phr." },
+  { word: "in light of", meaning: "~을 고려하여, 비추어 볼 때", pos: "phr." },
+  { word: "stem from", meaning: "~에서 기인하다, 비롯되다", pos: "phr." },
+  { word: "date back to", meaning: "~까지 거슬러 올라가다", pos: "phr." },
+  { word: "piece together", meaning: "종합하다, 짜맞추다", pos: "phr." },
+  { word: "call into question", meaning: "~에 의문을 제기하다", pos: "phr." },
+  { word: "come to terms with", meaning: "~을 수용하다, 타협하다", pos: "phr." },
+  { word: "draw on", meaning: "~을 차용하다, 활용하다", pos: "phr." },
+  { word: "in terms of", meaning: "~의 관점에서", pos: "phr." },
+  { word: "give voice to", meaning: "~의 목소리를 대변하다", pos: "phr." },
+  { word: "play a role in", meaning: "~에서 역할을 하다", pos: "phr." },
+  { word: "play a pivotal role in", meaning: "~에서 중추적 역할을 하다", pos: "phr." },
+  { word: "lead to", meaning: "~로 이어지다, 초래하다", pos: "phr." },
+  { word: "consist of", meaning: "~로 구성되다", pos: "phr." },
+  { word: "depend on", meaning: "~에 의존하다, 달려있다", pos: "phr." },
+  { word: "rely on", meaning: "~에 의존하다", pos: "phr." },
+  { word: "result in", meaning: "~라는 결과를 낳다", pos: "phr." },
+  { word: "result from", meaning: "~에서 비롯되다", pos: "phr." },
+  { word: "due to", meaning: "~ 때문에, 기인하는", pos: "phr." },
+  { word: "prior to", meaning: "~에 앞서, 이전에", pos: "phr." },
+  { word: "in addition to", meaning: "~에 더하여, 게다가", pos: "phr." },
+  { word: "in spite of", meaning: "~에도 불구하고", pos: "phr." },
+  { word: "by means of", meaning: "~에 의하여", pos: "phr." },
+  { word: "with respect to", meaning: "~에 관하여", pos: "phr." },
+  { word: "in favor of", meaning: "~에 찬성하여, 지지하여", pos: "phr." },
+  { word: "keep track of", meaning: "~을 추적하다, 기록하다", pos: "phr." },
+  { word: "come up with", meaning: "~을 제시하다, 생각해내다", pos: "phr." },
+  { word: "put up with", meaning: "~을 참다, 견디다", pos: "phr." },
+  { word: "get rid of", meaning: "~을 제거하다, 없애다", pos: "phr." },
+  { word: "take for granted", meaning: "~을 당연하게 여기다", pos: "phr." },
+  { word: "make sense of", meaning: "~을 이해하다", pos: "phr." },
+  { word: "carry out", meaning: "수행하다, 실행하다", pos: "phr." },
+  { word: "point out", meaning: "지적하다, 언급하다", pos: "phr." },
+  { word: "break down", meaning: "분해되다, 무너지다", pos: "phr." },
+  { word: "turn out", meaning: "~로 판명되다", pos: "phr." },
+  { word: "set the stage for", meaning: "~의 장을 마련하다", pos: "phr." },
+  { word: "cast doubt on", meaning: "~에 의문을 던지다", pos: "phr." }
+];
+
+function lemmatizeEnglishWord(word) {
+  if (!word) return [];
+  const w = word.toLowerCase().trim();
+  const cands = [w];
+  if (IRREGULAR_LEMMAS[w]) cands.push(IRREGULAR_LEMMAS[w]);
+
+  if (w.endsWith('ies') && w.length > 4) cands.push(w.slice(0, -3) + 'y');
+  if (w.endsWith('ied') && w.length > 4) cands.push(w.slice(0, -3) + 'y');
+  if (w.endsWith('ves') && w.length > 4) { cands.push(w.slice(0, -3) + 'f'); cands.push(w.slice(0, -3) + 'fe'); }
+  if (w.endsWith('es') && w.length > 4) { cands.push(w.slice(0, -2)); cands.push(w.slice(0, -1)); }
+  if (w.endsWith('s') && !w.endsWith('ss') && w.length > 3) cands.push(w.slice(0, -1));
+
+  if (w.endsWith('ed') && w.length > 4) {
+    cands.push(w.slice(0, -1));
+    cands.push(w.slice(0, -2));
+    if (w.length > 5 && w[w.length - 3] === w[w.length - 4]) {
+      cands.push(w.slice(0, -3));
+    }
+  }
+
+  if (w.endsWith('ing') && w.length > 5) {
+    cands.push(w.slice(0, -3) + 'e');
+    cands.push(w.slice(0, -3));
+    if (w.length > 6 && w[w.length - 4] === w[w.length - 5]) {
+      cands.push(w.slice(0, -4));
+    }
+    if (w.endsWith('ying')) cands.push(w.slice(0, -4) + 'ie');
+  }
+
+  if (w.endsWith('ily') && w.length > 4) cands.push(w.slice(0, -3) + 'y');
+  if (w.endsWith('ally') && w.length > 5) { cands.push(w.slice(0, -4)); cands.push(w.slice(0, -4) + 'ic'); }
+  if (w.endsWith('ly') && w.length > 4) cands.push(w.slice(0, -2));
+
+  return [...new Set(cands)];
+}
+
+function findWordInMasterDb(word, passageVocab) {
+  if (!word) return null;
+  const wLower = word.toLowerCase().trim();
+  
+  // 1. 지문 등록 어휘 우선 확인
+  if (passageVocab && Array.isArray(passageVocab)) {
+    const v = passageVocab.find(item => item.word && item.word.toLowerCase() === wLower);
+    if (v) {
+      return { foundWord: word, baseWord: v.word, isInflected: false, meanings: [v.meaning], pos: v.pos, isFromPassageVocab: true };
+    }
+  }
+
+  // 2. 20,243 Master DB 직접 일치
+  if (WORDTEST_MAP.has(wLower)) {
+    return { foundWord: word, baseWord: word, isInflected: false, meanings: WORDTEST_MAP.get(wLower) };
+  }
+
+  // 3. 굴절형(복수형/과거형/진행형) 원형 탐색
+  const cands = lemmatizeEnglishWord(wLower);
+  for (const cand of cands) {
+    if (cand === wLower) continue;
+
+    if (passageVocab && Array.isArray(passageVocab)) {
+      const v = passageVocab.find(item => item.word && item.word.toLowerCase() === cand);
+      if (v) {
+        return { foundWord: word, baseWord: v.word, isInflected: true, meanings: [v.meaning], pos: v.pos, isFromPassageVocab: true };
+      }
+    }
+
+    if (WORDTEST_MAP.has(cand)) {
+      return { foundWord: word, baseWord: cand, isInflected: true, meanings: WORDTEST_MAP.get(cand) };
+    }
+  }
+
+  return null;
+}
+
+function detectSurroundingIdiom(clickedWord, sentenceEn, passageVocab) {
+  if (!sentenceEn || !clickedWord) return null;
+  const wLower = clickedWord.toLowerCase().trim();
+  const wCands = lemmatizeEnglishWord(wLower);
+
+  const idiomsToScan = [];
+  if (passageVocab && Array.isArray(passageVocab)) {
+    passageVocab.forEach(v => {
+      if (v.isIdiom || (v.word && v.word.includes(" "))) {
+        idiomsToScan.push({ word: v.word, meaning: v.meaning, pos: "phr." });
+      }
+    });
+  }
+  MASTER_COMMON_IDIOMS.forEach(m => {
+    if (!idiomsToScan.some(item => item.word.toLowerCase() === m.word.toLowerCase())) {
+      idiomsToScan.push(m);
+    }
+  });
+
+  for (const item of idiomsToScan) {
+    const phrase = item.word.toLowerCase().trim();
+    const tokens = phrase.split(/\s+/);
+
+    const matchesToken = tokens.some(t => {
+      const tCands = lemmatizeEnglishWord(t);
+      return wCands.some(c => tCands.includes(c));
+    });
+
+    if (!matchesToken) continue;
+
+    const regexPattern = tokens.map(t => {
+      const base = t.replace(/(?:e|es|s|ed|ing)$/, '');
+      return '\\b' + base + '[a-z]*\\b';
+    }).join('\\s+');
+
+    const regex = new RegExp(regexPattern, 'i');
+    const match = sentenceEn.match(regex);
+    if (match) {
+      return {
+        matchedText: match[0],
+        idiomBase: item.word,
+        meaning: item.meaning || '',
+        pos: item.pos || 'phr.'
+      };
+    }
+  }
+  return null;
+}
+
+function selectContextualMeaning(meanings, sentenceKo, isFromPassageVocab) {
+  if (!meanings || meanings.length === 0) return { contextualMeaning: "", otherMeanings: [] };
+  if (isFromPassageVocab) {
+    return { contextualMeaning: meanings[0], otherMeanings: meanings.slice(1) };
+  }
+
+  let matchedIdx = -1;
+  if (sentenceKo) {
+    for (let i = 0; i < meanings.length; i++) {
+      const m = meanings[i];
+      const tokens = m.split(/[,\s~/()]+/).filter(t => t.length >= 2);
+      for (const tok of tokens) {
+        if (sentenceKo.includes(tok)) {
+          matchedIdx = i;
+          break;
+        }
+      }
+      if (matchedIdx !== -1) break;
+    }
+  }
+
+  const primeIdx = matchedIdx !== -1 ? matchedIdx : 0;
+  const contextual = meanings[primeIdx];
+  const others = meanings.filter((_, idx) => idx !== primeIdx);
+  return { contextualMeaning: contextual, otherMeanings: others };
+}
+
 // 모바일 및 사파리 시크릿 모드 대응 무결성 로컬 스토리지 래퍼
 const safeStorage = {
   getItem: function(key) {
@@ -575,8 +801,7 @@ function renderPassageContent(passage) {
       const rawWord = el.getAttribute("data-word");
       const sentenceIdx = parseInt(el.getAttribute("data-sidx") || "0", 10);
       const sentenceObj = passage.sentences[sentenceIdx];
-      const sentenceContext = sentenceObj ? sentenceObj.en : "";
-      showWordPopup(rawWord, sentenceContext, e);
+      showWordPopup(rawWord, sentenceObj, e, passage);
     });
   });
 
@@ -584,6 +809,10 @@ function renderPassageContent(passage) {
     el.addEventListener("click", (e) => {
       e.stopPropagation();
       el.classList.toggle("cloze-revealed");
+      const rawWord = el.getAttribute("data-word");
+      const sentenceIdx = parseInt(el.getAttribute("data-sidx") || "0", 10);
+      const sentenceObj = passage.sentences[sentenceIdx];
+      showWordPopup(rawWord, sentenceObj, e, passage);
     });
   });
 }
@@ -627,26 +856,52 @@ function formatSentenceWords(text, passage, sentenceIdx) {
 }
 
 // ==========================================
-// 8,000 DICTIONARY POPUP WITH AI CONTEXT
+// 20,243 DICTIONARY POPUP (LEMMATIZER + IDIOM + BLUE CONTEXTUAL MEANING)
 // ==========================================
-async function showWordPopup(word, sentenceContext, event) {
+async function showWordPopup(word, sentenceContext, event, passage) {
   const popup = document.getElementById("word-popup");
-  const currentPassage = state.passages.find(p => p.id === state.currentPassageId);
+  const currentPassage = passage || state.passages.find(p => p.id === state.currentPassageId);
+
+  const sentenceEn = typeof sentenceContext === 'object' && sentenceContext
+    ? (sentenceContext.en || '')
+    : (typeof sentenceContext === 'string' ? sentenceContext : '');
+  const sentenceKo = typeof sentenceContext === 'object' && sentenceContext
+    ? (sentenceContext.ko || '')
+    : '';
 
   document.getElementById("popup-word").textContent = word;
+  const lemmaInfoEl = document.getElementById("popup-lemma-info");
+  if (lemmaInfoEl) lemmaInfoEl.textContent = "";
+
   document.getElementById("popup-pos").textContent = "";
-  document.getElementById("popup-korean-meaning").textContent = "사전 조회 중...";
+  document.getElementById("popup-korean-meaning").innerHTML = `<span class="text-zinc-400 font-mono text-xs">사전 조회 중...</span>`;
   document.getElementById("popup-eng-meaning").textContent = "Loading definition...";
 
+  // 1. 숙어/구문 감지 (클릭한 단어가 포함된 문맥 속 숙어 추출)
+  const idiomBox = document.getElementById("popup-idiom-box");
+  const idiomMatchedEl = document.getElementById("popup-idiom-matched");
+  const idiomMeaningEl = document.getElementById("popup-idiom-meaning");
+
+  const detectedIdiom = detectSurroundingIdiom(word, sentenceEn, currentPassage ? currentPassage.vocabulary : []);
+  if (detectedIdiom && idiomBox && idiomMatchedEl && idiomMeaningEl) {
+    idiomBox.classList.remove("hidden");
+    idiomMatchedEl.textContent = detectedIdiom.matchedText;
+    idiomMeaningEl.innerHTML = `<span class="text-blue-700 dark:text-blue-300 font-bold">${detectedIdiom.meaning}</span>`;
+  } else if (idiomBox) {
+    idiomBox.classList.add("hidden");
+  }
+
+  // AI 박스 초기화
   const aiBox = document.getElementById("popup-ai-context-box");
   const aiContextEl = document.getElementById("popup-ai-context");
-  aiBox.classList.add("hidden");
+  if (aiBox) aiBox.classList.add("hidden");
 
+  // 팝업 위치 계산
   const rect = event.target.getBoundingClientRect();
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
   const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
   popup.style.top = `${rect.bottom + scrollTop + 8}px`;
-  popup.style.left = `${Math.min(window.innerWidth - 380, Math.max(10, rect.left + scrollLeft - 50))}px`;
+  popup.style.left = `${Math.min(window.innerWidth - 390, Math.max(10, rect.left + scrollLeft - 60))}px`;
   popup.style.display = "block";
 
   document.getElementById("popup-pronounce-btn").onclick = () => speakWord(word);
@@ -655,41 +910,65 @@ async function showWordPopup(word, sentenceContext, event) {
   const isSaved = state.savedWords.some(w => w.word.toLowerCase() === word.toLowerCase());
   saveBtn.textContent = isSaved ? "★ 저장됨" : "☆ 단어장 저장";
 
-  // 1. wordtest1 Master DB 검색
-  const wordtestMeanings = WORDTEST_MAP.get(word.toLowerCase());
-  let koreanMeaning = "";
+  // 2. 굴절형(복수형/과거형/진행형/부사형) 자동 원형 복원 & 20,243 DB 검색
+  const foundData = findWordInMasterDb(word, currentPassage ? currentPassage.vocabulary : []);
+  let contextualMeaningText = "";
 
-  if (wordtestMeanings && wordtestMeanings.length > 0) {
-    koreanMeaning = wordtestMeanings.join(", ");
-    document.getElementById("popup-korean-meaning").textContent = koreanMeaning;
-    const dbSize = WORDTEST_MAP.size > 0 ? `${WORDTEST_MAP.size.toLocaleString()} DB` : "Master DB";
-    document.getElementById("popup-pos").textContent = dbSize;
-  } else {
-    // 지문 어휘 체크
-    const foundInVocab = currentPassage && currentPassage.vocabulary
-      ? currentPassage.vocabulary.find(v => v.word.toLowerCase() === word.toLowerCase())
-      : null;
-    if (foundInVocab) {
-      koreanMeaning = foundInVocab.meaning;
-      document.getElementById("popup-korean-meaning").textContent = koreanMeaning;
-      document.getElementById("popup-pos").textContent = foundInVocab.pos;
-    } else {
-      fetchSmartTranslation(word).then(tr => {
-        document.getElementById("popup-korean-meaning").textContent = tr;
-      });
+  if (foundData) {
+    if (foundData.isInflected && lemmaInfoEl) {
+      lemmaInfoEl.textContent = `[원형: ${foundData.baseWord}]`;
     }
+    const dbSize = WORDTEST_MAP.size > 0 ? `${WORDTEST_MAP.size.toLocaleString()} DB` : "Master DB";
+    document.getElementById("popup-pos").textContent = foundData.pos || dbSize;
+
+    // 3. 지문 문맥에서 사용된 의미 판별 및 파란색 하이라이트
+    const { contextualMeaning, otherMeanings } = selectContextualMeaning(
+      foundData.meanings,
+      sentenceKo,
+      foundData.isFromPassageVocab
+    );
+    contextualMeaningText = contextualMeaning || (foundData.meanings[0] || "");
+
+    let meaningHtml = "";
+    if (contextualMeaning) {
+      meaningHtml += `
+        <div class="space-y-1">
+          <div>
+            <span class="popup-contextual-meaning" title="지문 문맥에서 사용된 의미">${contextualMeaning}</span>
+          </div>
+          ${otherMeanings.length > 0 ? `
+            <div class="popup-other-meanings">기타 뜻: ${otherMeanings.join(", ")}</div>
+          ` : ''}
+        </div>
+      `;
+    } else {
+      meaningHtml = `<div class="text-zinc-800 dark:text-zinc-200">${foundData.meanings.join(", ")}</div>`;
+    }
+    document.getElementById("popup-korean-meaning").innerHTML = meaningHtml;
+
+    saveBtn.onclick = () => {
+      toggleSaveWord(foundData.baseWord || word, contextualMeaningText);
+    };
+
+    fetchEnglishDefinition(foundData.baseWord || word);
+  } else {
+    // 4. 외부 스마트 번역 폴백
+    fetchSmartTranslation(word).then(tr => {
+      document.getElementById("popup-korean-meaning").innerHTML = `
+        <span class="popup-contextual-meaning">${tr}</span>
+      `;
+      contextualMeaningText = tr;
+      saveBtn.onclick = () => {
+        toggleSaveWord(word, tr);
+      };
+    });
+    fetchEnglishDefinition(word);
   }
 
-  saveBtn.onclick = () => {
-    toggleSaveWord(word, document.getElementById("popup-korean-meaning").textContent);
-  };
-
-  fetchEnglishDefinition(word);
-
   // AI 문맥 분석
-  if (sentenceContext && state.geminiApiKey) {
-    fetchAIContextAnalysis(word, sentenceContext).then(analysis => {
-      if (analysis) {
+  if (sentenceEn && state.geminiApiKey) {
+    fetchAIContextAnalysis(word, sentenceEn).then(analysis => {
+      if (analysis && aiBox && aiContextEl) {
         aiBox.classList.remove("hidden");
         aiContextEl.innerHTML = analysis;
       }
@@ -1248,15 +1527,17 @@ function initDictionaryTab() {
     const q = input.value.trim().toLowerCase();
     if (!q) return;
 
-    const meanings = WORDTEST_MAP.get(q);
+    const currentPassage = state.passages.find(p => p.id === state.currentPassageId);
+    const foundData = findWordInMasterDb(q, currentPassage ? currentPassage.vocabulary : []);
     const dbCountLabel = WORDTEST_MAP.size > 0 ? `${WORDTEST_MAP.size.toLocaleString()} DB` : "Master DB";
-    if (meanings && meanings.length > 0) {
-      const meaningStr = meanings.join(", ");
+    if (foundData && foundData.meanings && foundData.meanings.length > 0) {
+      const meaningStr = foundData.meanings.join(", ");
       container.innerHTML = `
         <div class="p-4 border border-zinc-200 dark:border-zinc-800 rounded-sm bg-white dark:bg-zinc-900 shadow-xs space-y-3">
           <div class="flex items-center justify-between">
             <div class="flex items-baseline space-x-2">
-              <h4 class="font-serif font-black text-xl text-zinc-900 dark:text-zinc-100">${q}</h4>
+              <h4 class="font-serif font-black text-xl text-blue-600 dark:text-blue-400">${q}</h4>
+              ${foundData.isInflected ? `<span class="text-xs font-mono text-zinc-500">[원형: ${foundData.baseWord}]</span>` : ''}
               <span class="text-[10px] font-mono px-1.5 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold rounded-xs">${dbCountLabel}</span>
             </div>
             <button id="dict-search-speak-btn" class="p-1.5 text-zinc-500 hover:text-zinc-900 dark:hover:text-white" title="발음 청취">
@@ -1274,9 +1555,9 @@ function initDictionaryTab() {
           </div>
         </div>
       `;
-      document.getElementById("dict-search-speak-btn").onclick = () => speakWord(q);
+      document.getElementById("dict-search-speak-btn").onclick = () => speakWord(foundData.baseWord || q);
       document.getElementById("dict-search-save-btn").onclick = () => {
-        toggleSaveWord(q, meaningStr);
+        toggleSaveWord(foundData.baseWord || q, meaningStr);
       };
     } else {
       container.innerHTML = `
