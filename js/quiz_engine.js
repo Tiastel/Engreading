@@ -699,47 +699,82 @@ const DerivativeQuizEngine = (function() {
 
   return {
     /**
-     * 특정 지문에 대한 독해 + 파생 퀴즈 통합 세트 (총 6문항)
-     * [01~03]: 기본 독해 이해 (Comprehension)
-     * [04]: 빈칸 추론 (Sentence Cloze)
-     * [05]: 문단 순서 (Paragraph Ordering)
-     * [06]: 편입 논리완성 (Transfer Logic Completion)
+     * 특정 지문에 대한 독해 + 파생 퀴즈 통합 세트 (지문 당 2~4문제 표준화)
+     * [01]: 기본 독해 이해 / 주제 파악 (Comprehension)
+     * [02]: 세부 내용 일치 / 문맥 추론 (Inference / Detail)
+     * [03]: 학술 빈칸 추론 (Sentence Cloze)
+     * [04]: (고급/심화) 편입 논리완성 (Transfer Logic Completion)
      */
     getEnrichedQuizzesForPassage: function(passage) {
       if (!passage) return [];
 
       const result = [];
+      const baseQuizzes = passage.quiz || [];
+      const level = (passage.level || 'Intermediate').toLowerCase();
 
-      // 1. 기본 독해 이해 문제 (3문항)
-      if (passage.quiz && passage.quiz.length > 0) {
-        passage.quiz.forEach(q => {
-          result.push({
-            ...q,
-            type: "comprehension",
-            typeLabel: "독해 이해"
-          });
+      // 결정론적 타겟 문항 수 (2~4문제 엄격 준수)
+      // Beginner: 2~3문제, Intermediate: 3문제, Advanced: 3~4문제
+      const hash = Math.abs(hashCode(passage.id || passage.title || "passage"));
+      let targetCount = 3;
+      if (level === 'beginner') {
+        targetCount = (hash % 2 === 0) ? 2 : 3;
+      } else if (level === 'intermediate') {
+        targetCount = 3;
+      } else { // advanced
+        targetCount = (hash % 2 === 0) ? 3 : 4;
+      }
+
+      // 1. 기본 독해 이해 문제 (1~2문항 우선 배치)
+      const numComprehension = targetCount === 2 ? 1 : (targetCount === 4 ? 2 : (baseQuizzes.length >= 2 ? 2 : 1));
+      for (let i = 0; i < Math.min(numComprehension, baseQuizzes.length); i++) {
+        result.push({
+          ...baseQuizzes[i],
+          type: "comprehension",
+          typeLabel: "독해 일치/추론"
         });
       }
 
-      // 2. 빈칸 추론 문제 (1문항)
-      const clozeQuiz = generateClozeQuiz(passage);
-      if (clozeQuiz) {
-        result.push(clozeQuiz);
+      // 2. 학술 문맥 빈칸 추론 (Sentence Cloze)
+      if (result.length < targetCount) {
+        const clozeQuiz = generateClozeQuiz(passage);
+        if (clozeQuiz) {
+          result.push(clozeQuiz);
+        }
       }
 
-      // 3. 문단 순서 배열 문제 (1문항)
-      const orderQuiz = generateOrderingQuiz(passage);
-      if (orderQuiz) {
-        result.push(orderQuiz);
+      // 3. 편입 논리완성 또는 문단 순서 문제 (목표 문항 수 충족)
+      if (result.length < targetCount) {
+        if (level === 'advanced' || hash % 2 === 0) {
+          const logicQuiz = generateTransferLogicQuiz(passage);
+          if (logicQuiz) result.push(logicQuiz);
+        } else {
+          const orderQuiz = generateOrderingQuiz(passage);
+          if (orderQuiz) result.push(orderQuiz);
+        }
       }
 
-      // 4. 편입 논리완성 문제 (1문항)
-      const logicQuiz = generateTransferLogicQuiz(passage);
-      if (logicQuiz) {
-        result.push(logicQuiz);
+      // 만약 생성기가 null을 반환하여 목표에 미달하면 남은 기본 퀴즈로 보충
+      if (result.length < targetCount && baseQuizzes.length > result.length) {
+        for (let i = result.length; i < baseQuizzes.length && result.length < targetCount; i++) {
+          result.push({
+            ...baseQuizzes[i],
+            type: "comprehension",
+            typeLabel: "독해 일치"
+          });
+        }
       }
 
-      return result;
+      // 안전 장치: 최소 2문제 보장
+      if (result.length < 2 && baseQuizzes.length > 0) {
+        baseQuizzes.forEach((q, idx) => {
+          if (result.length < 2 && !result.some(r => r.question === q.question)) {
+            result.push({ ...q, type: "comprehension", typeLabel: "독해 일치" });
+          }
+        });
+      }
+
+      // 엄격한 범위 보장: 2 <= 문항 수 <= 4
+      return result.slice(0, 4);
     },
 
     /**

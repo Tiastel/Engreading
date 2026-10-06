@@ -786,30 +786,94 @@ function renderVocabTab(passage) {
 
   container.innerHTML = `
     <div class="space-y-3">
-      <div class="flex items-center justify-between text-xs font-mono text-zinc-500 pb-1 border-b border-zinc-100 dark:border-zinc-800">
-        <span>ESSENTIAL LEXICON (${passage.vocabulary.length})</span>
-        <button id="btn-listen-all-vocab" class="hover:text-zinc-900 dark:hover:text-white underline">ALL AUDIO</button>
-      </div>
-      ${passage.vocabulary.map(v => `
-        <div class="p-3 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-sm">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-              <span class="font-serif font-bold text-base text-zinc-900 dark:text-zinc-100">${v.word}</span>
-              <span class="text-[10px] font-mono px-1 py-0.2 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-xs">${v.pos || 'v.'}</span>
-            </div>
-            <button class="vocab-speak-btn text-zinc-400 hover:text-zinc-900 dark:hover:text-white" data-word="${v.word}">
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            </button>
-          </div>
-          <div class="text-xs font-bold text-zinc-700 dark:text-zinc-300 mt-1">${v.meaning}</div>
-          ${v.example ? `<div class="text-[11px] font-serif italic text-zinc-500 dark:text-zinc-400 mt-1.5 pl-2 border-l border-zinc-300 dark:border-zinc-700">"${v.example}"</div>` : ''}
+      <div class="flex items-center justify-between text-xs font-mono text-zinc-500 pb-2 border-b border-zinc-200 dark:border-zinc-800">
+        <span class="font-bold">ESSENTIAL LEXICON (${passage.vocabulary.length})</span>
+        <div class="flex items-center space-x-2">
+          <button id="btn-toggle-all-meanings" class="px-2 py-0.5 text-[11px] rounded bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900 font-medium transition cursor-pointer" title="모든 단어 뜻 일괄 표시 / 숨김">
+            👁️ 전체 뜻 보기
+          </button>
+          <button id="btn-listen-all-vocab" class="hover:text-zinc-900 dark:hover:text-white underline text-[11px] transition">ALL AUDIO</button>
         </div>
-      `).join("")}
+      </div>
+      <div id="vocab-cards-list" class="space-y-2.5">
+        ${passage.vocabulary.map((v, idx) => `
+          <div class="vocab-card p-3 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-sm cursor-pointer select-none transition" data-idx="${idx}">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="vocab-word-text font-serif font-bold text-base text-blue-600 dark:text-blue-400">${v.word}</span>
+                ${v.isIdiom ? `
+                  <span class="vocab-badge-idiom text-[10px] font-mono px-1.5 py-0.5 rounded">숙어·구문</span>
+                ` : `
+                  <span class="vocab-badge-word text-[10px] font-mono px-1.5 py-0.5 rounded">${v.pos || '단어'}</span>
+                `}
+              </div>
+              <button class="vocab-speak-btn text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 p-1" data-word="${v.word}" title="발음 듣기">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+            </div>
+            <div class="vocab-meaning-container mt-1.5">
+              <span class="vocab-meaning-text vocab-meaning-hidden text-sm font-bold text-blue-700 dark:text-blue-300" title="마우스 호버 또는 클릭 시 뜻 확인">${v.meaning}</span>
+              <span class="vocab-hint-text text-[10px] font-mono text-zinc-400 dark:text-zinc-500 ml-1.5 select-none">(호버/터치)</span>
+            </div>
+            ${v.example ? `<div class="text-[11px] font-serif italic text-zinc-500 dark:text-zinc-400 mt-2 pl-2 border-l border-zinc-300 dark:border-zinc-700 select-text">"${v.example}"</div>` : ''}
+          </div>
+        `).join("")}
+      </div>
     </div>
   `;
 
+  // 각 단어별 카드 클릭 시 가림 해제/고정 토글 (모바일 탭 및 데스크톱 클릭 지원)
+  const cards = container.querySelectorAll(".vocab-card");
+  cards.forEach(card => {
+    card.addEventListener("click", (e) => {
+      // 오디오 버튼 클릭 시는 카드 토글 방지
+      if (e.target.closest(".vocab-speak-btn")) return;
+      
+      const meaningEl = card.querySelector(".vocab-meaning-hidden");
+      const hintEl = card.querySelector(".vocab-hint-text");
+      const isCurrentlyRevealed = card.classList.contains("is-revealed");
+      
+      if (isCurrentlyRevealed) {
+        card.classList.remove("is-revealed");
+        if (meaningEl) meaningEl.classList.remove("revealed");
+        if (hintEl) hintEl.style.display = "inline";
+      } else {
+        card.classList.add("is-revealed");
+        if (meaningEl) meaningEl.classList.add("revealed");
+        if (hintEl) hintEl.style.display = "none";
+      }
+    });
+  });
+
+  // 전체 뜻 보기 / 가리기 일괄 토글
+  const toggleAllBtn = document.getElementById("btn-toggle-all-meanings");
+  if (toggleAllBtn) {
+    let allShown = false;
+    toggleAllBtn.onclick = () => {
+      allShown = !allShown;
+      cards.forEach(card => {
+        const meaningEl = card.querySelector(".vocab-meaning-hidden");
+        const hintEl = card.querySelector(".vocab-hint-text");
+        if (allShown) {
+          card.classList.add("is-revealed");
+          if (meaningEl) meaningEl.classList.add("revealed");
+          if (hintEl) hintEl.style.display = "none";
+        } else {
+          card.classList.remove("is-revealed");
+          if (meaningEl) meaningEl.classList.remove("revealed");
+          if (hintEl) hintEl.style.display = "inline";
+        }
+      });
+      toggleAllBtn.innerHTML = allShown ? "🙈 전체 뜻 가리기" : "👁️ 전체 뜻 보기";
+    };
+  }
+
+  // 발음 듣기 버튼
   container.querySelectorAll(".vocab-speak-btn").forEach(btn => {
-    btn.onclick = () => speakWord(btn.getAttribute("data-word"));
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      speakWord(btn.getAttribute("data-word"));
+    };
   });
 
   const allBtn = document.getElementById("btn-listen-all-vocab");

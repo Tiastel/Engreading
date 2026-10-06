@@ -313,3 +313,103 @@ body {
 .dark ::-webkit-scrollbar-thumb {
   background: #3f3f46;
 }
+
+/* ==========================================================================
+   어휘 암기 특화 스타일 (단어 스펠링 및 뜻 파란색 + 호버/클릭 블러 가림/노출)
+   ========================================================================== */
+.vocab-card {
+  position: relative;
+  transition: all 0.2s ease;
+  user-select: text;
+}
+.vocab-card:hover {
+  border-color: #93c5fd;
+}
+.dark .vocab-card:hover {
+  border-color: #1e40af;
+}
+
+/* 단어 스펠링 파란색 (가독성 & 암기 집중도 극대화) */
+.vocab-word-text {
+  color: #2563eb !important; /* Tailwind Blue 600 */
+  font-family: var(--font-serif);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.dark .vocab-word-text {
+  color: #60a5fa !important; /* Tailwind Blue 400 */
+}
+
+/* 한국어 뜻 파란색 */
+.vocab-meaning-text {
+  color: #1d4ed8 !important; /* Tailwind Blue 700 */
+  font-weight: 700;
+  display: inline-block;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.dark .vocab-meaning-text {
+  color: #93c5fd !important; /* Tailwind Blue 300 */
+}
+
+/* 기본 상태: 뜻 가림 (블러 효과) */
+.vocab-meaning-hidden {
+  filter: blur(5px) grayscale(60%);
+  opacity: 0.22;
+  user-select: none;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 0 4px;
+  background-color: rgba(219, 234, 254, 0.4);
+}
+.dark .vocab-meaning-hidden {
+  background-color: rgba(30, 58, 138, 0.25);
+  opacity: 0.25;
+}
+
+/* 호버 시 뜻 부드럽게 노출 (Active Recall) */
+.vocab-card:hover .vocab-meaning-hidden,
+.vocab-meaning-container:hover .vocab-meaning-hidden,
+.vocab-meaning-hidden:hover {
+  filter: blur(0px) grayscale(0%);
+  opacity: 1 !important;
+  user-select: auto;
+  background-color: transparent;
+}
+
+/* 클릭으로 고정 해제/노출된 상태 */
+.vocab-card.is-revealed .vocab-meaning-hidden,
+.vocab-meaning-hidden.revealed {
+  filter: blur(0px) grayscale(0%) !important;
+  opacity: 1 !important;
+  user-select: auto !important;
+  background-color: transparent !important;
+}
+
+/* 숙어 및 구문 배지 스타일 */
+.vocab-badge-idiom {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  font-weight: 600;
+  border-radius: 2px;
+}
+.dark .vocab-badge-idiom {
+  background-color: rgba(146, 64, 14, 0.25);
+  color: #fcd34d;
+  border-color: rgba(180, 83, 9, 0.4);
+}
+
+/* 일반 어휘 배지 스타일 */
+.vocab-badge-word {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #dbeafe;
+  font-weight: 500;
+  border-radius: 2px;
+}
+.dark .vocab-badge-word {
+  background-color: rgba(30, 58, 138, 0.25);
+  color: #93c5fd;
+  border-color: rgba(30, 58, 138, 0.4);
+}
+
