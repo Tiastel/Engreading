@@ -3,15 +3,26 @@
  * Integrates 300 passages, wordtest1 22,000+ Master DB, Word Test quiz, and Wrong Answers Notebook.
  */
 
-// 22,000+ 마스터 단어 DB 맵 초기화
+// 22,000+ 마스터 단어 DB 맵 및 백그라운드 로딩 상태 관리
 const WORDTEST_MAP = new Map();
-if (typeof defaultWords !== "undefined" && Array.isArray(defaultWords)) {
-  for (const item of defaultWords) {
-    if (item.word) {
-      WORDTEST_MAP.set(item.word.toLowerCase(), item.meanings || []);
+let isWordtestDbLoaded = false;
+let isLogicBankLoaded = false;
+
+function initWordtestMap() {
+  const words = (typeof defaultWords !== "undefined" && Array.isArray(defaultWords))
+    ? defaultWords
+    : ((typeof window !== "undefined" && window.defaultWords) ? window.defaultWords : null);
+
+  if (words && Array.isArray(words)) {
+    for (const item of words) {
+      if (item && item.word) {
+        WORDTEST_MAP.set(item.word.toLowerCase(), item.meanings || []);
+      }
     }
+    isWordtestDbLoaded = true;
   }
 }
+initWordtestMap();
 
 // 모바일 및 사파리 시크릿 모드 대응 무결성 로컬 스토리지 래퍼
 const safeStorage = {
@@ -123,16 +134,56 @@ document.addEventListener("DOMContentLoaded", () => {
   try { setupKeyboardShortcuts(); } catch (e) { console.warn("Shortcuts warn:", e); }
   try { initDictionaryTab(); } catch (e) { console.warn("Dictionary tab warn:", e); }
   try { updateProgressUI(); } catch (e) { console.warn("Progress UI warn:", e); }
+
+  // 4. [속도 혁신] 대용량 DB 백그라운드 지연 로딩 (초기 렌더링 후 비동기 로딩)
+  try { loadBackgroundDatabases(); } catch (e) { console.warn("Background db load warn:", e); }
 });
+
+function loadBackgroundDatabases() {
+  function injectScript(src, callback) {
+    if (typeof document === "undefined") return;
+    if (document.querySelector(`script[src="${src}"]`)) {
+      if (callback) callback();
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = src;
+    s.async = true;
+    s.onload = () => { if (callback) callback(); };
+    s.onerror = (e) => { console.warn("Failed to background load " + src, e); };
+    document.body.appendChild(s);
+  }
+
+  // 지문 본문이 화면에 그려진 직후 (100ms 후) 조용히 백그라운드 다운로드
+  setTimeout(() => {
+    // 1. 20,243 단어 데이터베이스 로딩 (2.27MB)
+    injectScript("js/wordtest_db.js", () => {
+      initWordtestMap();
+      initMasterVocabUI();
+      console.log("20,243 Word DB background load completed!");
+    });
+
+    // 2. 편입 논리완성 1,000제 문제 은행 로딩 (1.86MB)
+    injectScript("js/logic_bank.js", () => {
+      isLogicBankLoaded = true;
+      if (typeof window !== "undefined" && window._MASTER_LOGIC_BANK) {
+        window.MASTER_LOGIC_BANK = window._MASTER_LOGIC_BANK;
+      }
+      console.log("1,000 Logic Bank background load completed!");
+    });
+  }, 100);
+}
 
 function initMasterVocabUI() {
   const count = typeof defaultWords !== "undefined" && Array.isArray(defaultWords)
     ? defaultWords.length
-    : WORDTEST_MAP.size;
-  const countFormatted = count > 0 ? count.toLocaleString() : "15,000";
+    : (WORDTEST_MAP.size > 0 ? WORDTEST_MAP.size : 20243);
+  const countFormatted = count.toLocaleString();
 
   const headerBadge = document.getElementById("header-wordtest-count-badge");
-  if (headerBadge) headerBadge.textContent = `${countFormatted} DB`;
+  if (headerBadge) {
+    headerBadge.textContent = `${countFormatted} DB`;
+  }
 
   const searchDbCount = document.getElementById("search-db-count");
   if (searchDbCount) searchDbCount.textContent = countFormatted;
@@ -1254,8 +1305,21 @@ function renderLibraryGrid(level, searchQuery) {
 // MODAL 2: wordtest1 연동 단어 시험 (Word Test)
 // ==========================================
 function openWordTestModal() {
+  if (!isWordtestDbLoaded && (typeof defaultWords === "undefined" || !Array.isArray(defaultWords))) {
+    showToast("20,243 단어 데이터베이스를 연결 중입니다...");
+    const s = document.createElement("script");
+    s.src = "js/wordtest_db.js";
+    s.onload = () => {
+      initWordtestMap();
+      initMasterVocabUI();
+      generateNewWordTest();
+      document.getElementById("wordtest-modal")?.classList.remove("hidden");
+    };
+    document.body.appendChild(s);
+    return;
+  }
   generateNewWordTest();
-  document.getElementById("wordtest-modal").classList.remove("hidden");
+  document.getElementById("wordtest-modal")?.classList.remove("hidden");
 }
 
 function generateNewWordTest() {
@@ -2270,7 +2334,21 @@ function setupEventListeners() {
   document.getElementById("btn-toggle-logic-view")?.addEventListener("click", () => {
     document.getElementById("main-reading-view")?.classList.add("hidden");
     document.getElementById("main-logic-view")?.classList.remove("hidden");
-    renderLogicLabContent();
+    if (!isLogicBankLoaded && (typeof _MASTER_LOGIC_BANK === "undefined" || !Array.isArray(_MASTER_LOGIC_BANK))) {
+      showToast("1,000제 편입 논리완성 은행을 연결 중입니다...");
+      const s = document.createElement("script");
+      s.src = "js/logic_bank.js";
+      s.onload = () => {
+        isLogicBankLoaded = true;
+        if (typeof window !== "undefined" && window._MASTER_LOGIC_BANK) {
+          window.MASTER_LOGIC_BANK = window._MASTER_LOGIC_BANK;
+        }
+        renderLogicLabContent();
+      };
+      document.body.appendChild(s);
+    } else {
+      renderLogicLabContent();
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
