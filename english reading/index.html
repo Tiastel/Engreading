@@ -32,7 +32,7 @@
   <!-- ============================================================== -->
   <!-- TOP UTILITY & INSTITUTIONAL HEADER (학술 마스트헤드) -->
   <!-- ============================================================== -->
-  <header class="border-b border-zinc-200 dark:border-zinc-800 bg-[#faf9f6] dark:bg-[#111215] sticky top-0 z-40">
+  <header class="border-b border-zinc-200 dark:border-zinc-800 bg-[#faf9f6] dark:bg-[#111215] sm:sticky sm:top-0 z-40">
     
     <!-- 1층: 글로벌 상태 및 학술 저널 메타 바 -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400 border-b border-zinc-200/70 dark:border-zinc-800/60 font-mono tracking-tight">
@@ -125,6 +125,38 @@
     <!-- 좌측/중앙: 리더 영역 (7 컬럼) -->
     <article class="lg:col-span-7 flex flex-col space-y-5">
       
+      <!-- ============================================================== -->
+      <!-- 학술 독해 커리큘럼 네비게이터: 난이도 탭 & 구문/장문 분량 스위치 -->
+      <!-- ============================================================== -->
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 rounded-sm shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+        <!-- 좌측: 난이도 탭 세트 (초급 / 중급 / 고급 / 전체) -->
+        <div class="flex items-center space-x-1.5 flex-wrap gap-y-1">
+          <span class="text-[11px] font-bold text-zinc-500 uppercase mr-1">난이도:</span>
+          <button id="level-tab-all" class="level-tab-btn px-2.5 py-1 rounded text-[11px] font-bold transition border border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900 shadow-xs" data-level="All">
+            전체 (300)
+          </button>
+          <button id="level-tab-b" class="level-tab-btn px-2.5 py-1 rounded text-[11px] font-semibold transition border border-zinc-200 dark:border-zinc-800 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400" data-level="Beginner">
+            초급 A2-B1 (100)
+          </button>
+          <button id="level-tab-i" class="level-tab-btn px-2.5 py-1 rounded text-[11px] font-semibold transition border border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400" data-level="Intermediate">
+            중급 B1-B2 (100)
+          </button>
+          <button id="level-tab-a" class="level-tab-btn px-2.5 py-1 rounded text-[11px] font-semibold transition border border-zinc-200 dark:border-zinc-800 hover:border-purple-500 hover:text-purple-600 dark:hover:text-purple-400" data-level="Advanced">
+            고급 B2-C1 (100)
+          </button>
+        </div>
+
+        <!-- 우측: 독해 분량 & 호흡 형식 스위치 (구문/단문 vs 실전 중장문) -->
+        <div class="flex items-center space-x-1 bg-zinc-100 dark:bg-zinc-800/80 p-0.5 rounded border border-zinc-200 dark:border-zinc-700 text-[11px]">
+          <button id="btn-mode-clause" class="passage-mode-btn px-2.5 py-1 rounded text-zinc-600 dark:text-zinc-400 font-semibold hover:text-zinc-900 dark:hover:text-white transition" title="4~5문장 핵심 구문 분석 및 직독직해 집중 훈련">
+            🔍 구문·단문
+          </button>
+          <button id="btn-mode-full" class="passage-mode-btn px-2.5 py-1 rounded bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white font-bold shadow-xs transition" title="11~14문장 3개 문단 실전 학술 심층 독해">
+            📖 실전 중·장문
+          </button>
+        </div>
+      </div>
+
       <!-- 아티클 헤더 & 바이라인 -->
       <div class="border-b border-zinc-200 dark:border-zinc-800 pb-5">
         
@@ -249,8 +281,8 @@
       </div>
 
       <!-- 본문 텍스트 렌더링 컨테이너 -->
-      <div class="bg-white dark:bg-[#15161a] border border-zinc-200 dark:border-zinc-800 p-6 sm:p-9 rounded-sm shadow-xs min-h-[420px]">
-        <div id="passage-text-container" class="passage-editorial leading-[1.85] text-zinc-900 dark:text-zinc-100 text-lg transition-all">
+      <div class="bg-white dark:bg-[#15161a] border border-zinc-200 dark:border-zinc-800 p-4 sm:p-8 rounded-sm shadow-xs min-h-[320px]">
+        <div id="passage-text-container" class="passage-editorial leading-[1.85] text-zinc-900 dark:text-zinc-100 text-base sm:text-lg transition-all">
           <!-- JS 렌더링 -->
         </div>
 
